@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- 视口 -->
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+		<meta charset="utf-8">
+		<title></title>
+		<!-- vue -->
+		<script src="http://imgqn.wcsmia.cn/static/js/vue.min.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<header>
+				<p @click="closeScan">返回</p>
+				<span>请扫码二维码</span>
+				<p @click="scanImg">相册</p>
+			</header>
+			<div id="bcid">
+				<div style="height:40%"></div>
+				<p class="tip">...载入中...</p>
+			</div>
+		</div>
+
+		</div>
+		<script type="text/javascript">
+			let scan = null;
+			new Vue({
+				el: "#app",
+				data: {
+					codeUrl: "",
+				},
+				methods: {
+					methods: {
+						// 创建扫描控件
+						startRecognize() {
+							let that = this;
+							if (!window.plus) return;
+							scan = new plus.barcode.Barcode(
+								"bcid",
+								[plus.barcode.QR, plus.barcode.EAN8, plus.barcode.EAN13], {
+									frameColor: "#009DE2",
+									scanbarColor: "#009DE2"
+								}
+							);
+							//scan.onmarked = onmarked;
+
+							// 开始扫描
+							scan.start();
+
+							function onmarked(type, result, file) {
+								switch (type) {
+									case plus.barcode.QR:
+										type = "QR";
+										break;
+									case plus.barcode.EAN13:
+										type = "EAN13";
+										break;
+									case plus.barcode.EAN8:
+										type = "EAN8";
+										break;
+									default:
+										type = "其它" + type;
+										break;
+								}
+								result = result.replace(/\n/g, "");
+								that.codeUrl = result;
+								window.localStorage.codeUrl = result;
+								// alert(result);
+								that.closeScan();
+							}
+						},
+						// 关闭返回
+						closeScan() {
+							if (!window.plus) return;
+							scan.close();
+							this.$router.push({
+								path: "/home"
+							});
+						},
+						scanImg() {
+							// 从系统相册选择文件
+							if (!window.plus) return;
+							plus.gallery.pick(
+								function(path) {
+									// alert(path);
+									plus.barcode.scan(
+										path,
+										function(type, result) {
+											// alert("Scan success:(" + type + ")" + result);
+											window.localStorage.codeUrl2 = result;
+										},
+										function(e) {
+											console.log(e);
+											window.localStorage.codeUrl2 = e;
+											plus.nativeUI.alert("如果图片无法识别,请用扫码上传");
+										}
+									);
+								},
+								function(e) {
+									alert("取消选择图片");
+								}, {
+									filter: "image"
+								}
+							);
+						}
+					}
+
+
+				}
+				mounted() {
+					//跳转时自动开启
+					this.startRecognize();
+				},
+				created: function() {
+
+				},
+				computed: {},
+				components: {},
+			})
+		</script>
+
+		<script type="text/javascript">
+			let scan = null;
+			export default {
+				data() {
+					return {
+						codeUrl: ""
+					};
+				},
+
+
+			};
+		</script>
+	</body>
+</html>
