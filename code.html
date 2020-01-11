@@ -28,8 +28,11 @@ function onmarked( type, result ) {
 	alert( text+result );
 }
 function startRecognize(){
-	scan = new plus.barcode.Barcode('bcid');
-	scan.onmarked = onmarked; 
+		setTimeout(()=>{
+					scan = new plus.barcode.Barcode('bcid');
+	scan.onmarked = onmarked; 					
+								}200)
+
 }
 function startScan(){
 	scan.start();
