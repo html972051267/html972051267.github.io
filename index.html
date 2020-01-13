@@ -1,29 +1,86 @@
 <!DOCTYPE html>
 
-<html><head>
+<html>
+	<head>
+		<title>扫码</title>
+		<script src="js/5.js" type="text/javascript" charset="utf-8"></script>
+		<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+		<button onclick="getMedia()">扫一扫</button>
+		<button onclick="myStopFunction()">关闭</button>
+		<video style="display: none;" id="video" width="500" height="500" autoplay></video>
+		<canvas style="display: none;" id="qr-canvas" width="500" height="500"></canvas>
+		<script type="text/javascript">
+			let ischenge
+			let ctx, video, canvas;
+			var myVar;
+			// 开启摄像头
+			function getMedia() {
+				ischenge = true;
+				var config = {
+					video: {
+						width: 500,
+						height: 500
+					},
+					audio: false
+				}
+				//获取视频dom节点
+				video = document.getElementById("video");
+				video.style.display = 'block';
+				var promise = navigator.mediaDevices.getUserMedia(config) //调用摄像头
+				canvas = document.getElementById("qr-canvas"); //获取画布
+				ctx = canvas.getContext("2d"); //定义画笔
+				promise.then((stream) => { //开启成功
+					if (stream.active) {
+						video.srcObject = stream;
+						video.play();
+						decode(); //解码
 
-    <title>HTML5 code Reader</title>
+					} else {
+						getMedia();
+					}
+				});
+			}
+			// 解码
+			function decode() {
+				let that = this;
+				try {
+					ctx.drawImage(video, 0, 0, 500, 500) //将绘制画布
+					qrcode.decode(canvas.toDataURL('image/png')) //解析画布信息
+				} catch (e) {
+					console.log('1:' + "未识别二维码");
+				};
+				myFunction() //重复解码
 
-    <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+			}
+			// 解码频率
+			function myFunction() {
+				let that = this
+				myVar = setTimeout(that.decode.bind(that), 100); // 解码频率为100毫秒一次
+			};
+			//关闭解码
+			function myStopFunction() {
+				clearTimeout(myVar);
+				video.style.display = 'none';
+			}
+			// 回调
+			qrcode.callback = (e) => {
+				if (e == "error decoding QR Code") {
+					console.log("解码失败")
+				} else {
+					// 解码成功成功 
+					alert(`二维码内容`+e)
+					myStopFunction() //关闭解码
+					this.canvas.clearRect(0, 0, 500, 500);
+					
+				}
+				//结果回调
 
-</head>
-
-<div>
-	<button onclick="test()">666</button>
-</div>
+			}
+		</script>
 
 
-<script>
-	function test(){
-		alert(66666666)
-	}
-   
 
-</script>
-
-  <body>
-
-
- 
-
-</body></html>
+	</body>
+</html>
